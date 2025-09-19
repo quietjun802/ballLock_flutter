@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'category_screen.dart'; // 카테고리 화면 import
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? selectedCategory; // ✅ 선택된 카테고리 상태 저장
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +59,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
 
-                  // ✅ 여기 버튼 누르면 CategoryScreen 이동
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -82,7 +88,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 15),
 
-              // 카테고리 리스트 (이미지는 그대로 둠)
+              // ✅ 카테고리 리스트 (토글형)
               SizedBox(
                 height: 110,
                 child: ListView(
@@ -108,12 +114,14 @@ class HomeScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                      child: _buildFoodCard(
-                          "Sandwich", "\$15.50", "assets/images/sandwich.png")),
+                    child: _buildFoodCard(
+                        "Sandwich", "\$15.50", "assets/images/sandwich.png"),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
-                      child: _buildFoodCard(
-                          "Hamburger", "\$19.99", "assets/images/burger.png")),
+                    child: _buildFoodCard(
+                        "Hamburger", "\$19.99", "assets/images/burger.png"),
+                  ),
                 ],
               ),
             ],
@@ -148,26 +156,50 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // 카테고리 위젯 (탭 이벤트 제거됨)
+  // ✅ 토글형 카테고리 위젯
   Widget _buildCategory(String title, String imagePath) {
-    return Container(
-      width: 90,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            imagePath,
-            height: 40,
-            fit: BoxFit.contain,
+    final bool isSelected = selectedCategory == title;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            selectedCategory = null; // 다시 누르면 해제
+          } else {
+            selectedCategory = title; // 새로운 선택
+          }
+        });
+      },
+      child: Container(
+        width: 90,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF11AB69) : Colors.grey[200],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF11AB69) : Colors.transparent,
+            width: 2,
           ),
-          const SizedBox(height: 8),
-          Text(title),
-        ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // ✅ 이미지 색은 그대로 유지
+            Image.asset(
+              imagePath,
+              height: 40,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
