@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -51,7 +48,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBTm7dRsBAdzOPJ9ZPp4A7oNZuWu-_JPq4',
-    appId: '1:732037580334:android:ea1e39d80015fa216101bf',
+    appId: '1:732037580334:android:80c16743be74479c6101bf',
     messagingSenderId: '732037580334',
     projectId: 'ball-lock',
     storageBucket: 'ball-lock.firebasestorage.app',
@@ -59,10 +56,21 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBhIuWJHcuCnnzklqgRjPP4XNBb1B70dG4',
-    appId: '1:732037580334:ios:aa940142460802766101bf',
+    appId: '1:732037580334:ios:11f6ead295e3ccf46101bf',
     messagingSenderId: '732037580334',
     projectId: 'ball-lock',
     storageBucket: 'ball-lock.firebasestorage.app',
-    iosBundleId: 'com.balllock.app',
+    iosBundleId: 'com.example.ball',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyAD66zc-XaM38g_T-XkYd2B-8-mRDbwcG8',
+    appId: '1:732037580334:web:c8a57a71aa6c02a46101bf',
+    messagingSenderId: '732037580334',
+    projectId: 'ball-lock',
+    authDomain: 'ball-lock.firebaseapp.com',
+    storageBucket: 'ball-lock.firebasestorage.app',
+    measurementId: 'G-WEP4KHQFFG',
+  );
+
 }

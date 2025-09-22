@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 
+// test
+import 'firebase_options.dart';
+
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();       // ✅ 필수
-  await Firebase.initializeApp(                    // ✅ Firebase 준비 끝날 때까지 대기
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());                           // ✅ 초기화 후 앱 시작
+
+  print(DefaultFirebaseOptions.currentPlatform.appId);
+  print(DefaultFirebaseOptions.currentPlatform.projectId);
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -22,7 +28,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Food Locker',
       theme: ThemeData(primarySwatch: Colors.green),
-      home: const SplashScreen(), // 3초 후 HomeScreen으로 pushReplacement
+      home: const SplashScreen(),
     );
   }
 }

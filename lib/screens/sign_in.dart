@@ -1,5 +1,6 @@
 // lib/screens/auth/sign_in.dart
 import 'package:flutter/material.dart';
+import 'sign_up.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -56,8 +57,7 @@ class _SignInPageState extends State<SignInPage> {
 
             Expanded(
               child: SingleChildScrollView(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -123,11 +123,25 @@ class _SignInPageState extends State<SignInPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      'Need An Account?',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
+
+                    // ✅ Need An Account 버튼으로 변경
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SignUpPage(), // sign_up.dart 화면으로 이동
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Need An Account?  Sign Up',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: const Color(0xFF11AB69),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -139,6 +153,7 @@ class _SignInPageState extends State<SignInPage> {
       ),
     );
   }
+
 
   OutlineInputBorder _inputBorder({bool isFocused = false}) {
     return OutlineInputBorder(

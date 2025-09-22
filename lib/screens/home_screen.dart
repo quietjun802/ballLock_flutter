@@ -1,7 +1,9 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'category_screen.dart';
-import 'sign_in.dart';
+
+import 'category_screen.dart';   // 경로 확인
+import 'sign_in.dart';      // 경로가 다르면 'sign_in.dart'로 바꿔줘
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,8 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String? selectedCategory; // ✅ 선택된 카테고리 상태 저장
-  int _currentIndex = 0;    // ✅ 하단바 현재 인덱스
+  String? selectedCategory;   // ✅ 선택된 카테고리 상태
+  int _currentIndex = 0;      // ✅ 하단바 현재 인덱스
 
   @override
   Widget build(BuildContext context) {
@@ -133,25 +135,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // 하단 네비게이션바
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,                   // ✅ 현재 인덱스
+        currentIndex: _currentIndex,
         selectedItemColor: const Color(0xFF11AB69),
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
-        onTap: (i) async {                             // ✅ 탭 핸들러
-          if (i == 3) { // Profile
-            final user = FirebaseAuth.instance.currentUser;
-            if (user == null) {
-              // 미로그인 → 로그인 화면으로 이동, 성공 시 true 반환
-              final ok = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(builder: (_) => const SignInPage()),
-              );
-              if (ok == true && mounted) setState(() {});
-              return; // 하단바 인덱스 변경하지 않음
-            } else {
-              // TODO: 로그인 되어 있으면 프로필 화면으로 이동
-              // Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
-            }
+        onTap: (i) async {
+          if (i == 3) {
+            // ✅ 프로필 탭 → 로그인 화면으로 이동
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SignInPage()),
+            );
+            return; // 인덱스 변경 안 함 (원하면 _currentIndex = 3 으로 유지해도 됨)
           }
           setState(() => _currentIndex = i);
         },
@@ -168,15 +163,10 @@ class _HomeScreenState extends State<HomeScreen> {
   // ✅ 토글형 카테고리 위젯
   Widget _buildCategory(String title, String imagePath) {
     final bool isSelected = selectedCategory == title;
-
     return GestureDetector(
       onTap: () {
         setState(() {
-          if (isSelected) {
-            selectedCategory = null; // 다시 누르면 해제
-          } else {
-            selectedCategory = title; // 새로운 선택
-          }
+          selectedCategory = isSelected ? null : title;
         });
       },
       child: Container(

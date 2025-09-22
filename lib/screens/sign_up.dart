@@ -1,5 +1,7 @@
-// lib/screens/auth/sign_up.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';        // ✅ Firebase Auth
+import 'package:cloud_firestore/cloud_firestore.dart';    // ✅ Firestore
+import 'dart:async';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -17,6 +19,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _obscurePw = true;
   bool _obscureCf = true;
   bool _marketing = false;
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -27,6 +30,13 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  void _showError(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
   OutlineInputBorder _border({bool isFocused = false}) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(10),
     borderSide: BorderSide(
@@ -35,6 +45,79 @@ class _SignUpPageState extends State<SignUpPage> {
     ),
   );
 
+  Future<void> _createAccount() async {
+    final name = _name.text.trim();
+    final email = _email.text.trim();
+    final pw = _password.text;
+    final cf = _confirm.text;
+
+    if (name.isEmpty || email.isEmpty || pw.isEmpty || cf.isEmpty) {
+      _showError('모든 필드를 입력해주세요.');
+      return;
+    }
+    if (pw.length < 6) {
+      _showError('비밀번호는 최소 6자 이상이어야 합니다.');
+      return;
+    }
+    if (pw != cf) {
+      _showError('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    try {
+      setState(() => _loading = true);
+
+      final cred = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: pw)
+          .timeout(const Duration(seconds: 20));
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(cred.user!.uid)
+          .set({
+        'uid': cred.user!.uid,
+        'name': name,
+        'email': email,
+        'marketing': _marketing,
+        'createdAt': FieldValue.serverTimestamp(),
+      })
+          .timeout(const Duration(seconds: 20));
+
+      // 회원가입 후 로그인 화면으로 돌려보내고 싶으면 로그아웃
+      await FirebaseAuth.instance.signOut();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('회원가입이 완료되었습니다. 로그인해주세요.')),
+      );
+      Navigator.pop(context, true);
+    } on TimeoutException {
+      _showError('네트워크가 지연되고 있어요. 잠시 후 다시 시도해주세요.');
+    } on FirebaseAuthException catch (e) {
+      String msg;
+      switch (e.code) {
+        case 'email-already-in-use':
+          msg = '이미 사용 중인 이메일입니다.';
+          break;
+        case 'invalid-email':
+          msg = '잘못된 이메일 형식입니다.';
+          break;
+        case 'weak-password':
+          msg = '비밀번호가 너무 약합니다.';
+          break;
+        default:
+          msg = '회원가입 실패: ${e.code}';
+      }
+      _showError(msg);
+    } on FirebaseException catch (e) {
+      _showError('데이터 저장 실패: ${e.message ?? e.code}');
+    } catch (e) {
+      _showError('오류 발생: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,6 +125,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: SafeArea(
         child: Column(
           children: [
+            // AppBar 스타일
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(
@@ -66,6 +150,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ],
               ),
             ),
+
             Expanded(
               child: SingleChildScrollView(
                 padding:
@@ -77,10 +162,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     const SizedBox(height: 14),
                     _filledField(
                       controller: _email,
-                      hint: 'Email  Id or Username',
+                      hint: 'Email Id or Username',
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 14),
+                    // 비밀번호 입력
                     TextField(
                       controller: _password,
                       obscureText: _obscurePw,
@@ -103,6 +189,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ),
                     const SizedBox(height: 14),
+                    // 비밀번호 확인
                     TextField(
                       controller: _confirm,
                       obscureText: _obscureCf,
@@ -125,12 +212,15 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
+
+                    // 마케팅 수신 동의 체크박스
                     Row(
                       children: [
                         Checkbox(
                           value: _marketing,
                           activeColor: const Color(0xFF6DB06C),
-                          onChanged: (v) => setState(() => _marketing = v!),
+                          onChanged: (v) =>
+                              setState(() => _marketing = v ?? false),
                         ),
                         const Expanded(
                           child: Text(
@@ -142,19 +232,17 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 6),
 
-                    const _OrDivider(labelTop: 'OR', labelBottom: 'Sign Up using'),
+                    // Divider + 소셜 로그인
+                    const OrDivider(
+                        labelTop: 'OR', labelBottom: 'Sign Up using'),
                     const SizedBox(height: 8),
-                    const _SocialRow(),
+                    const SocialRow(),
 
                     const SizedBox(height: 22),
-                    _PrimaryButton(
-                      label: 'Create Account',
-                      onPressed: () {
-                        // TODO: 실제 회원가입 처리
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Create Account tapped')),
-                        );
-                      },
+                    // 회원가입 버튼
+                    PrimaryButton(
+                      label: _loading ? 'Creating...' : 'Create Account',
+                      onPressed: _loading ? null : _createAccount,
                     ),
                   ],
                 ),
@@ -188,11 +276,12 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 }
 
-// 재사용 위젯들 (Sign In 파일과 동일 이름/동작)
-class _OrDivider extends StatelessWidget {
+// ---------------- 재사용 위젯 ----------------
+
+class OrDivider extends StatelessWidget {
   final String labelTop;
   final String labelBottom;
-  const _OrDivider({required this.labelTop, required this.labelBottom});
+  const OrDivider({super.key, required this.labelTop, required this.labelBottom});
 
   @override
   Widget build(BuildContext context) {
@@ -207,8 +296,7 @@ class _OrDivider extends StatelessWidget {
             Expanded(child: Divider(color: grey)),
             const SizedBox(width: 12),
             Text(labelBottom,
-                style:
-                TextStyle(color: Colors.grey.shade600, letterSpacing: 0.2)),
+                style: TextStyle(color: Colors.grey.shade600, letterSpacing: 0.2)),
             const SizedBox(width: 12),
             Expanded(child: Divider(color: grey)),
           ],
@@ -218,30 +306,31 @@ class _OrDivider extends StatelessWidget {
   }
 }
 
-class _SocialRow extends StatelessWidget {
-  const _SocialRow();
+class SocialRow extends StatelessWidget {
+  const SocialRow({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: const [
-        _CircleBrand(label: 'N', bg: Color(0xFF03C75A)), // Naver
+        CircleBrand(label: 'N', bg: Color(0xFF03C75A)), // Naver
         SizedBox(width: 18),
-        _CircleBrand(label: 'G', bg: Colors.white, border: true), // Google
+        CircleBrand(label: 'G', bg: Colors.white, border: true), // Google
         SizedBox(width: 18),
-        _CircleBrand(label: 'K', bg: Color(0xFFFFE812), textColor: Colors.black), // Kakao
+        CircleBrand(label: 'K', bg: Color(0xFFFFE812), textColor: Colors.black), // Kakao
       ],
     );
   }
 }
 
-class _CircleBrand extends StatelessWidget {
+class CircleBrand extends StatelessWidget {
   final String label;
   final Color bg;
   final bool border;
   final Color textColor;
-  const _CircleBrand({
+  const CircleBrand({
+    super.key,
     required this.label,
     required this.bg,
     this.border = false,
@@ -258,7 +347,8 @@ class _CircleBrand extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           shape: BoxShape.circle,
-          border: border ? Border.all(color: Colors.grey.shade300, width: 2) : null,
+          border:
+          border ? Border.all(color: Colors.grey.shade300, width: 2) : null,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -281,10 +371,10 @@ class _CircleBrand extends StatelessWidget {
   }
 }
 
-class _PrimaryButton extends StatelessWidget {
+class PrimaryButton extends StatelessWidget {
   final String label;
-  final VoidCallback onPressed;
-  const _PrimaryButton({required this.label, required this.onPressed});
+  final VoidCallback? onPressed;
+  const PrimaryButton({super.key, required this.label, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
