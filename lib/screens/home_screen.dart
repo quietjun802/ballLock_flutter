@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'category_screen.dart'; // 카테고리 화면 import
+import 'category_screen.dart';
 import 'sign_in.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? selectedCategory; // ✅ 선택된 카테고리 상태 저장
+  int _currentIndex = 0;    // ✅ 하단바 현재 인덱스
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -133,26 +133,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // 하단 네비게이션바
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,                   // ✅ 현재 인덱스
         selectedItemColor: const Color(0xFF11AB69),
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
+        onTap: (i) async {                             // ✅ 탭 핸들러
+          if (i == 3) { // Profile
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              // 미로그인 → 로그인 화면으로 이동, 성공 시 true 반환
+              final ok = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(builder: (_) => const SignInPage()),
+              );
+              if (ok == true && mounted) setState(() {});
+              return; // 하단바 인덱스 변경하지 않음
+            } else {
+              // TODO: 로그인 되어 있으면 프로필 화면으로 이동
+              // Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+            }
+          }
+          setState(() => _currentIndex = i);
+        },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            label: "Favorites",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined),
-            label: "Cart",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: "Profile",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: "Favorites"),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_outlined), label: "Cart"),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
         ],
       ),
     );
@@ -186,12 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // ✅ 이미지 색은 그대로 유지
-            Image.asset(
-              imagePath,
-              height: 40,
-              fit: BoxFit.contain,
-            ),
+            Image.asset(imagePath, height: 40, fit: BoxFit.contain),
             const SizedBox(height: 8),
             Text(
               title,
@@ -227,21 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.asset(
-              imagePath,
-              height: 100,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+                imagePath, height: 100, width: double.infinity, fit: BoxFit.cover),
           ),
           const SizedBox(height: 10),
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          Text(
-            "Starting From $price",
-            style: const TextStyle(color: Colors.green),
-          ),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text("Starting From $price", style: const TextStyle(color: Colors.green)),
         ],
       ),
     );
