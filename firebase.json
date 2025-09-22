@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"ball-lock","appId":"1:732037580334:android:ea1e39d80015fa216101bf","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"ball-lock","configurations":{"android":"1:732037580334:android:ea1e39d80015fa216101bf","ios":"1:732037580334:ios:aa940142460802766101bf"}}}}}}

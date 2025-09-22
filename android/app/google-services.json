@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "732037580334",
+    "project_id": "ball-lock",
+    "storage_bucket": "ball-lock.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732037580334:android:ea1e39d80015fa216101bf",
+        "android_client_info": {
+          "package_name": "com.balllock.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTm7dRsBAdzOPJ9ZPp4A7oNZuWu-_JPq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732037580334:android:80c16743be74479c6101bf",
+        "android_client_info": {
+          "package_name": "com.example.ball"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTm7dRsBAdzOPJ9ZPp4A7oNZuWu-_JPq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
