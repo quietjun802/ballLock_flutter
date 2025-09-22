@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
 
 dev_dependencies:
   flutter_test:
@@ -20,6 +22,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # 👇 assets 등록 (폴더 전체)
   assets:
     - assets/images/
