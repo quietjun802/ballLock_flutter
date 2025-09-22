@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'category_screen.dart'; // 카테고리 화면 import
 import 'sign_in.dart';
 
