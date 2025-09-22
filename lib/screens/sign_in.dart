@@ -1,6 +1,5 @@
-// lib/screens/auth/sign_in.dart
 import 'package:flutter/material.dart';
-import 'sign_up.dart';
+import 'sign_up.dart'; // ← 경로 확인
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -29,7 +28,7 @@ class _SignInPageState extends State<SignInPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // AppBar 스타일 (좌측 Back, 중앙 타이틀)
+            // 상단 AppBar 스타일
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(
@@ -50,7 +49,7 @@ class _SignInPageState extends State<SignInPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48), // 타이틀 가운데 정렬 보정
+                  const SizedBox(width: 48),
                 ],
               ),
             ),
@@ -86,8 +85,7 @@ class _SignInPageState extends State<SignInPage> {
                                 ? Icons.visibility_off_rounded
                                 : Icons.visibility_rounded,
                           ),
-                          onPressed: () =>
-                              setState(() => _obscure = !_obscure),
+                          onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
                     ),
@@ -105,11 +103,9 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                     const SizedBox(height: 8),
 
-                    // OR 구분선 + "Sign In using"
                     const _OrDivider(labelTop: 'OR', labelBottom: 'Sign In using'),
                     const SizedBox(height: 8),
 
-                    // 소셜 로그인 버튼
                     const _SocialRow(),
 
                     const SizedBox(height: 20),
@@ -122,23 +118,29 @@ class _SignInPageState extends State<SignInPage> {
                         );
                       },
                     ),
+
                     const SizedBox(height: 16),
 
-                    // ✅ Need An Account 버튼으로 변경
+                    // ✅ 회원가입 이동
                     Center(
                       child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
+                        onPressed: () async {
+                          final created = await Navigator.push<bool>(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => const SignUpPage(), // sign_up.dart 화면으로 이동
-                            ),
+                            MaterialPageRoute(builder: (_) => const SignUpPage()),
                           );
+                          if (created == true && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('회원가입이 완료되었습니다. 로그인해주세요.'),
+                              ),
+                            );
+                          }
                         },
                         child: Text(
-                          'Need An Account?  Sign Up',
+                          'Need An Account?',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: const Color(0xFF11AB69),
+                            color: Colors.grey.shade700,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -153,7 +155,6 @@ class _SignInPageState extends State<SignInPage> {
       ),
     );
   }
-
 
   OutlineInputBorder _inputBorder({bool isFocused = false}) {
     return OutlineInputBorder(
@@ -186,8 +187,7 @@ class _LabeledField extends StatelessWidget {
         hintText: hint,
         filled: true,
         fillColor: const Color(0xFFF4F4F4),
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: _border(),
         enabledBorder: _border(),
         focusedBorder: _border(isFocused: true),
@@ -221,9 +221,10 @@ class _OrDivider extends StatelessWidget {
           children: [
             Expanded(child: Divider(color: grey)),
             const SizedBox(width: 12),
-            Text(labelBottom,
-                style:
-                TextStyle(color: Colors.grey.shade600, letterSpacing: 0.2)),
+            Text(
+              labelBottom,
+              style: TextStyle(color: Colors.grey.shade600, letterSpacing: 0.2),
+            ),
             const SizedBox(width: 12),
             Expanded(child: Divider(color: grey)),
           ],
@@ -308,12 +309,8 @@ class _PrimaryButton extends StatelessWidget {
       child: FilledButton(
         style: FilledButton.styleFrom(
           backgroundColor: const Color(0xFF6DB06C),
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          textStyle: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         onPressed: onPressed,
         child: Text(label),

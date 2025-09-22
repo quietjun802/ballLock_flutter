@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';        // ✅ Firebase Auth
-import 'package:cloud_firestore/cloud_firestore.dart';    // ✅ Firestore
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -30,13 +30,6 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  void _showError(String msg) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
-  }
-
   OutlineInputBorder _border({bool isFocused = false}) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(10),
     borderSide: BorderSide(
@@ -44,6 +37,11 @@ class _SignUpPageState extends State<SignUpPage> {
       width: 1.2,
     ),
   );
+
+  void _showError(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
 
   Future<void> _createAccount() async {
     final name = _name.text.trim();
@@ -67,10 +65,12 @@ class _SignUpPageState extends State<SignUpPage> {
     try {
       setState(() => _loading = true);
 
+      // 1) Auth
       final cred = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: pw)
           .timeout(const Duration(seconds: 20));
 
+      // 2) Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(cred.user!.uid)
@@ -80,17 +80,17 @@ class _SignUpPageState extends State<SignUpPage> {
         'email': email,
         'marketing': _marketing,
         'createdAt': FieldValue.serverTimestamp(),
-      })
-          .timeout(const Duration(seconds: 20));
+      }).timeout(const Duration(seconds: 20));
 
-      // 회원가입 후 로그인 화면으로 돌려보내고 싶으면 로그아웃
+      // 로그인 화면으로 되돌리려면 로그아웃
       await FirebaseAuth.instance.signOut();
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('회원가입이 완료되었습니다. 로그인해주세요.')),
       );
-      Navigator.pop(context, true);
+      Navigator.pop(context, true); // SignInPage로 복귀(성공 신호 true)
+
     } on TimeoutException {
       _showError('네트워크가 지연되고 있어요. 잠시 후 다시 시도해주세요.');
     } on FirebaseAuthException catch (e) {
@@ -125,7 +125,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // AppBar 스타일
+            // 상단 AppBar 스타일
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(
@@ -153,8 +153,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
             Expanded(
               child: SingleChildScrollView(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -166,7 +165,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 14),
-                    // 비밀번호 입력
+
+                    // 비밀번호
                     TextField(
                       controller: _password,
                       obscureText: _obscurePw,
@@ -183,12 +183,12 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: Icon(_obscurePw
                               ? Icons.visibility_off_rounded
                               : Icons.visibility_rounded),
-                          onPressed: () =>
-                              setState(() => _obscurePw = !_obscurePw),
+                          onPressed: () => setState(() => _obscurePw = !_obscurePw),
                         ),
                       ),
                     ),
                     const SizedBox(height: 14),
+
                     // 비밀번호 확인
                     TextField(
                       controller: _confirm,
@@ -206,21 +206,19 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: Icon(_obscureCf
                               ? Icons.visibility_off_rounded
                               : Icons.visibility_rounded),
-                          onPressed: () =>
-                              setState(() => _obscureCf = !_obscureCf),
+                          onPressed: () => setState(() => _obscureCf = !_obscureCf),
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
 
-                    // 마케팅 수신 동의 체크박스
+                    // 마케팅 동의
                     Row(
                       children: [
                         Checkbox(
                           value: _marketing,
                           activeColor: const Color(0xFF6DB06C),
-                          onChanged: (v) =>
-                              setState(() => _marketing = v ?? false),
+                          onChanged: (v) => setState(() => _marketing = v ?? false),
                         ),
                         const Expanded(
                           child: Text(
@@ -232,14 +230,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 6),
 
-                    // Divider + 소셜 로그인
-                    const OrDivider(
-                        labelTop: 'OR', labelBottom: 'Sign Up using'),
+                    const OrDivider(labelTop: 'OR', labelBottom: 'Sign Up using'),
                     const SizedBox(height: 8),
                     const SocialRow(),
 
                     const SizedBox(height: 22),
-                    // 회원가입 버튼
                     PrimaryButton(
                       label: _loading ? 'Creating...' : 'Create Account',
                       onPressed: _loading ? null : _createAccount,
@@ -266,8 +261,7 @@ class _SignUpPageState extends State<SignUpPage> {
         hintText: hint,
         filled: true,
         fillColor: const Color(0xFFF4F4F4),
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: _border(),
         enabledBorder: _border(),
         focusedBorder: _border(isFocused: true),
@@ -276,7 +270,7 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 }
 
-// ---------------- 재사용 위젯 ----------------
+// ===== 재사용 위젯 =====
 
 class OrDivider extends StatelessWidget {
   final String labelTop;
@@ -295,8 +289,10 @@ class OrDivider extends StatelessWidget {
           children: [
             Expanded(child: Divider(color: grey)),
             const SizedBox(width: 12),
-            Text(labelBottom,
-                style: TextStyle(color: Colors.grey.shade600, letterSpacing: 0.2)),
+            Text(
+              labelBottom,
+              style: TextStyle(color: Colors.grey.shade600, letterSpacing: 0.2),
+            ),
             const SizedBox(width: 12),
             Expanded(child: Divider(color: grey)),
           ],
@@ -347,8 +343,7 @@ class CircleBrand extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           shape: BoxShape.circle,
-          border:
-          border ? Border.all(color: Colors.grey.shade300, width: 2) : null,
+          border: border ? Border.all(color: Colors.grey.shade300, width: 2) : null,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -383,12 +378,8 @@ class PrimaryButton extends StatelessWidget {
       child: FilledButton(
         style: FilledButton.styleFrom(
           backgroundColor: const Color(0xFF6DB06C),
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          textStyle: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         onPressed: onPressed,
         child: Text(label),
