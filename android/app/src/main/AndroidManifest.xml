@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 🔐 네트워크 권한 (Firestore/Auth에 필수) -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
@@ -21,7 +20,6 @@
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode">
 
-            <!-- Flutter UI 초기 표시용 테마 -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
@@ -32,13 +30,11 @@
             </intent-filter>
         </activity>
 
-        <!-- Flutter가 플러그인 등록에 사용하는 메타데이터 -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
 
-    <!-- 텍스트 처리 인텐트 쿼리 (Flutter 기본) -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
