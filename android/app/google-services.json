@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "558902146609",
-    "project_id": "test-ball-e7215",
-    "storage_bucket": "test-ball-e7215.firebasestorage.app"
+    "project_number": "919983702313",
+    "project_id": "ball-lock-v2",
+    "storage_bucket": "ball-lock-v2.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:558902146609:android:d869c458f205516d464710",
+        "mobilesdk_app_id": "1:919983702313:android:cc56b2d69ce043d306f738",
         "android_client_info": {
           "package_name": "com.example.ball_test_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAYPdkV2X9fmTzXq7eG5GSiOgG7Ziq_e0o"
+          "current_key": "AIzaSyDMu4KdXwMIiijBXPN6AXjXD0dMe7NCkzA"
         }
       ],
       "services": {
